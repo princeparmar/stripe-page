@@ -7,67 +7,83 @@
 </head>
 
 <body>
-    <div id="payment-request-button">
-    </div>
+  <div>google pay (card added) + test card (chrome) --> pay from google pay card</div>
+  <div id="payment-request-button1">
+  </div>
+
+  <div>google pay (card added) + test card (chrome) --> pay from test cards</div>
+  <div id="payment-request-button2">
+  </div>
+
+  <div>google pay (XX) , chrome incog -> test card- > pay from test card</div>
+  <div id="payment-request-button3">
+  </div>
 <script>
 
 var stripe = Stripe('pk_test_4jj3JK0Q9q4pk2aAhd6eaiZE');
-var paymentRequest = stripe.paymentRequest({
-  country: 'US',
-  currency: 'inr',
-  total: {
-    label: 'Demo total',
-    amount: 100,
-  },
-  requestPayerName: true,
-  requestPayerEmail: true,
-});
 
 
-var elements = stripe.elements();
-var prButton = elements.create('paymentRequestButton', {
-  paymentRequest: paymentRequest,
-});
+function createPayment(clientSecrete, btnID, label) {
+  var paymentRequest = stripe.paymentRequest({
+    country: 'US',
+    currency: 'inr',
+    total: {
+      label,
+      amount: 100,
+    },
+    requestPayerName: true,
+    requestPayerEmail: true,
+  });
 
-// Check the availability of the Payment Request API first.
-paymentRequest.canMakePayment().then(function(result) {
-  if (result) {
-    prButton.mount('#payment-request-button');
-  } else {
-    console.log(result)
-    document.getElementById('payment-request-button').style.display = 'none';
-  }
-});
-
-let clientSecret = "pi_1GzGXTCbN56PSSODU5pS7JKq_secret_V4JLGBrGeq44E99YUpoy6boDt"
-
-paymentRequest.on('paymentmethod', function(ev) {
-  // Confirm the PaymentIntent without handling potential next actions (yet).
-  stripe.confirmCardPayment(
-    clientSecret,
-    {payment_method: ev.paymentMethod.id},
-    {handleActions: false}
-  ).then(function(confirmResult) {
-    if (confirmResult.error) {
-      // Report to the browser that the payment failed, prompting it to
-      // re-show the payment interface, or show an error message and close
-      // the payment interface.
-      ev.complete('fail');
+  var elements = stripe.elements();
+  var prButton = elements.create('paymentRequestButton', {
+    paymentRequest: paymentRequest,
+  });
+  // Check the availability of the Payment Request API first.
+  paymentRequest.canMakePayment().then(function(result) {
+    if (result) {
+      prButton.mount('#'+btnID);
     } else {
-      // Report to the browser that the confirmation was successful, prompting
-      // it to close the browser payment method collection interface.
-      ev.complete('success');
-      // Let Stripe.js handle the rest of the payment flow.
-      stripe.confirmCardPayment(clientSecret).then(function(result) {
-        if (result.error) {
-          // The payment failed -- ask your customer for a new payment method.
-        } else {
-          // The payment has succeeded.
-        }
-      });
+      console.log(result)
+      document.getElementById(btnID).style.display = 'none';
     }
   });
-});
+
+
+  paymentRequest.on('paymentmethod', function(ev) {
+    // Confirm the PaymentIntent without handling potential next actions (yet).
+    stripe.confirmCardPayment(
+      clientSecret,
+      {payment_method: ev.paymentMethod.id},
+      {handleActions: false}
+    ).then(function(confirmResult) {
+      if (confirmResult.error) {
+        // Report to the browser that the payment failed, prompting it to
+        // re-show the payment interface, or show an error message and close
+        // the payment interface.
+        ev.complete('fail');
+      } else {
+        // Report to the browser that the confirmation was successful, prompting
+        // it to close the browser payment method collection interface.
+        ev.complete('success');
+        // Let Stripe.js handle the rest of the payment flow.
+        stripe.confirmCardPayment(clientSecret).then(function(result) {
+          if (result.error) {
+            // The payment failed -- ask your customer for a new payment method.
+          } else {
+            // The payment has succeeded.
+          }
+        });
+      }
+    });
+  });
+
+}
+
+
+createPayment("pi_1GzKF0CbN56PSSODVGzZLhCq_secret_Exqt3TDAHe6btV5Ru24WFGeJ6","payment-request-button1", "google pay (card added) + test card (chrome) --> pay from google pay card")
+createPayment("pi_1GzKF0CbN56PSSODsN1vo8jr_secret_SzS0jGoIDyo6ezRnKu1D3r9jN","payment-request-button2", "google pay (card added) + test card (chrome) --> pay from test cards")
+createPayment("pi_1GzKF1CbN56PSSODWMewTCmg_secret_aeyXLe12gDrDiWgBSF6VuB89H","payment-request-button3", "google pay (XX) , chrome incog -> test card- > pay from test card")
 
 
 </script>
