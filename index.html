@@ -13,11 +13,11 @@
 
 var stripe = Stripe('pk_test_4jj3JK0Q9q4pk2aAhd6eaiZE');
 var paymentRequest = stripe.paymentRequest({
-  country: 'US',
+  country: 'IN',
   currency: 'inr',
   total: {
     label: 'Demo total',
-    amount: 1099,
+    amount: 100,
   },
   requestPayerName: true,
   requestPayerEmail: true,
@@ -39,7 +39,7 @@ paymentRequest.canMakePayment().then(function(result) {
   }
 });
 
-let clientSecret = "pi_1GzFelCbN56PSSODttX02lDE_secret_n47IN8SLPB1jrD70L1MiL3Ct4"
+let clientSecret = "pi_1GzGXTCbN56PSSODU5pS7JKq_secret_V4JLGBrGeq44E99YUpoy6boDt"
 
 paymentRequest.on('paymentmethod', function(ev) {
   // Confirm the PaymentIntent without handling potential next actions (yet).
